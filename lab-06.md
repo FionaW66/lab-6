@@ -145,13 +145,29 @@ fisheries_total %>%
   arrange(desc(total)) %>% 
   ggplot(aes(x = reorder(country, -total), y = total, fill = "pink")) + 
   geom_col(position = "dodge") + 
-  geom_text(aes(label = total)) +
+  geom_text(aes(label = comma(total))) +
   scale_y_continuous(labels = comma) +
   scale_x_discrete(labels = ~str_wrap(.x, width = 10)) + 
   labs(title = "Tonnage of fish captured and farmed in total for each country",
        x = "Country",
        y = "Tonnage") +
-  theme(text = element_text(size = 12))
+  theme(text = element_text(size = 12.5))
 ```
 
 ![](lab-06_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+This graph here only represents the total tonnage (capture +
+aquaculture).  
+What I changed:  
+1. I used bar plot instead of density/line plot. This is because a trend
+between countries doesn’t make a lot of sense.  
+2. I labeled the exact values on each bar. Because China has a very high
+value, other countries have shorter bars in the graph. It’s not easy to
+make sense of the value of those countries.  
+3. Added labels so that it’s clear what this graph is about.  
+4. Width of the graph so that it’s more readable.
+
+One thing that could be changed: represents capture, aquaculture, and
+total in the same graph.
+
+Let’s try doing that~
