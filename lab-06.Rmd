@@ -12,6 +12,7 @@ library(tidyverse)
 library(dsbox)
 library(mosaicData) 
 library(scales)
+library(forcats)
 ```
 
 Load data
@@ -129,4 +130,29 @@ What I changed:
 
 One thing that could be changed: represents capture, aquaculture, and total in the same graph. 
 
-Let's try doing that~
+Let's try doing that. This will need to include what we just learned: pivot_longer.
+```{r fig.height=8, fig.width=14}
+fisheries_long <- fisheries_total %>% 
+  pivot_longer(cols = c(capture, aquaculture),
+               names_to = "type",
+               values_to = "tonnage") %>% 
+  select(-total)
+
+fisheries_long <- fisheries_long %>% 
+  group_by(country) %>% 
+  mutate(total_tonnage = sum(tonnage)) %>% 
+  ungroup()
+
+fisheries_long %>% 
+  ggplot(aes(x = reorder(country, -total_tonnage), y = tonnage, fill = type)) + 
+  geom_col() +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(labels = ~str_wrap(.x, width = 10)) + 
+  labs(title = "Tonnage of fish captured and farmed in total for each country",
+       subtitle = "Capture and aquaculture",
+       x = "Country",
+       y = "Tonnage") +
+  theme(text = element_text(size = 12.5))
+```
+
+Now, this includes more information, and it makes sense. 
