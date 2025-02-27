@@ -201,3 +201,172 @@ fisheries_long %>%
 ![](lab-06_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 Now, this includes more information, and it makes sense.
+
+### Stretch
+
+``` r
+library(tidyverse)
+library(mosaicData)
+#install.packages("performance")
+library(performance)
+data(Whickham)
+```
+
+### Exercise 1
+
+I think the Wickham data is observational. Whether the participant smoke
+or not and whether they remain alive or not after 20 years cannot be
+manipulated.
+
+### Exercise 2
+
+There are 1314 observations in the data frame. All observations are
+women. Each observation includes the survival status after 20 years, the
+smoking status at baseline, and the age at the time of the first survey.
+
+### Exercise 3
+
+``` r
+tibble(Whickham)
+```
+
+    ## # A tibble: 1,314 × 3
+    ##    outcome smoker   age
+    ##    <fct>   <fct>  <int>
+    ##  1 Alive   Yes       23
+    ##  2 Alive   Yes       18
+    ##  3 Dead    Yes       71
+    ##  4 Alive   No        67
+    ##  5 Alive   No        64
+    ##  6 Alive   Yes       38
+    ##  7 Alive   Yes       45
+    ##  8 Dead    No        76
+    ##  9 Alive   No        28
+    ## 10 Alive   No        27
+    ## # ℹ 1,304 more rows
+
+There are three variables in the dataset. “Outcome” is a factor variable
+that includes two levels: Alive and Dead. “Smoker” is also a factor
+variable with two levels: Yes and No. “Age” is an integer variable.
+
+``` r
+Whickham %>% 
+  ggplot(aes(x = outcome, fill = outcome)) +
+  stat_count() +
+  geom_bar() +
+  labs(title = "Outcome Visual",
+       y = "Count")
+```
+
+![](lab-06_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+Whickham %>% 
+  ggplot(aes(x = smoker, fill = smoker)) +
+  geom_bar() +
+  labs(title = "Smoker Visual",
+       y = "Count")
+```
+
+![](lab-06_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+
+``` r
+Whickham %>% 
+  ggplot(aes(x = age)) +
+  geom_bar(color = "black", fill = "#fa9fb5") +
+  labs(title = "Age Visual",
+       y = "Count")
+```
+
+![](lab-06_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
+
+### Exercise 4
+
+I would expect that those who said Yes in the somker column are more
+likely to have “Dead” outcome after 20 years thant hose who said No.
+
+### Exercise 5
+
+``` r
+Whickham %>% 
+  count(smoker, outcome)
+```
+
+    ##   smoker outcome   n
+    ## 1     No   Alive 502
+    ## 2     No    Dead 230
+    ## 3    Yes   Alive 443
+    ## 4    Yes    Dead 139
+
+``` r
+Whickham %>% 
+  ggplot(aes(x = outcome, fill = smoker)) +
+  geom_bar() + 
+  labs(title = "Relationship between smoking status and health ouctome",
+       x = NULL)
+```
+
+![](lab-06_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+In the Dead outcome column, there are actually more non-smokers than
+smokers. This is a surprise.  
+Given the table, we can calculate four probabilities:  
+Probability of dead in non-smokers = 230/732 = 31.4%.  
+Probability of dead in smokers = 139/582 = 23.9%.  
+Probability of smokers in Dead = 139/369 = 37.6%.  
+Probability of non-smokers in Dead = 230/369 = 62.3%.  
+The first two are comparable: the probability of dead is higher in
+non-smokers.  
+The latter two are comparable: there are more non-smoker in the dead
+outcome.
+
+### Exercise 6
+
+``` r
+Whickham <- Whickham %>% 
+  mutate(age_cat = case_when(
+    age <= 44 ~ "18-44", 
+    age > 44 & age <= 64 ~ "45-64",
+    age > 64 ~ "65+"
+  ))
+```
+
+### Exercise 7
+
+``` r
+Whickham %>% 
+  ggplot(aes(x = outcome, fill = smoker)) + facet_wrap(~age_cat) +
+  geom_bar() + 
+  labs(title = "Relationship between smoking status and health ouctome",
+       subtitle = "By age groups",
+       x = NULL)
+```
+
+![](lab-06_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+``` r
+Whickham %>% 
+  count(smoker, age_cat, outcome)
+```
+
+    ##    smoker age_cat outcome   n
+    ## 1      No   18-44   Alive 327
+    ## 2      No   18-44    Dead  12
+    ## 3      No   45-64   Alive 147
+    ## 4      No   45-64    Dead  53
+    ## 5      No     65+   Alive  28
+    ## 6      No     65+    Dead 165
+    ## 7     Yes   18-44   Alive 270
+    ## 8     Yes   18-44    Dead  15
+    ## 9     Yes   45-64   Alive 167
+    ## 10    Yes   45-64    Dead  80
+    ## 11    Yes     65+   Alive   6
+    ## 12    Yes     65+    Dead  44
+
+Looking at the graph, for 18-44 age group, it doesn’t seem to matter
+that much for health outcomes whether you are a smoker or not. In the
+45-64 age group, smokers are more likely to have bad health outcomes
+than non-smokers. In the 65+ group, non-smokers are more likely to have
+bad health outcomes, yet they are also more likely to have good health
+outcomes too. I think age is a very big confounding variable in the
+relationship between smoking status and health outcomes.
